@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Markdown — dev harness</title>
+<!-- Development harness: runs the webview bundle in a browser with a fake VS Code host. -->
+<style>
+  body.vscode-dark {
+    --vscode-editor-foreground: #cccccc;
+    --vscode-editor-background: #1f1f1f;
+    --vscode-editorWidget-background: #202020;
+    --vscode-editorWidget-border: #454545;
+    --vscode-descriptionForeground: #9d9d9d;
+    --vscode-panel-border: #2b2b2b;
+    --vscode-textLink-foreground: #4daafc;
+    --vscode-textLink-activeForeground: #4daafc;
+    --vscode-textCodeBlock-background: #2b2b2b;
+    --vscode-textBlockQuote-border: #616161;
+    --vscode-textBlockQuote-background: #2b2b2b;
+    --vscode-focusBorder: #0078d4;
+    --vscode-editor-selectionBackground: #264f78;
+    --vscode-editorLineNumber-foreground: #6e7681;
+    --vscode-input-background: #313131;
+    --vscode-input-foreground: #cccccc;
+    --vscode-input-border: #3c3c3c;
+    --vscode-button-background: #0078d4;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-secondaryBackground: #313131;
+    --vscode-button-secondaryForeground: #cccccc;
+    --vscode-dropdown-background: #313131;
+    --vscode-dropdown-foreground: #cccccc;
+    --vscode-dropdown-border: #3c3c3c;
+    --vscode-toolbar-hoverBackground: rgba(90, 93, 94, 0.31);
+    --vscode-inputOption-activeBackground: rgba(36, 137, 219, 0.51);
+    --vscode-inputOption-activeBorder: #2488db;
+    --vscode-menu-background: #1f1f1f;
+    --vscode-menu-foreground: #cccccc;
+    --vscode-menu-selectionBackground: #0078d4;
+    --vscode-editor-font-family: Consolas, 'Courier New', monospace;
+    --vscode-editor-font-size: 14px;
+  }
+  body.vscode-light {
+    --vscode-editor-foreground: #3b3b3b;
+    --vscode-editor-background: #ffffff;
+    --vscode-editorWidget-background: #f8f8f8;
+    --vscode-editorWidget-border: #c8c8c8;
+    --vscode-descriptionForeground: #717171;
+    --vscode-panel-border: #e5e5e5;
+    --vscode-textLink-foreground: #005fb8;
+    --vscode-textLink-activeForeground: #005fb8;
+    --vscode-textCodeBlock-background: #f2f2f2;
+    --vscode-textBlockQuote-border: #e5e5e5;
+    --vscode-textBlockQuote-background: #f8f8f8;
+    --vscode-focusBorder: #005fb8;
+    --vscode-editor-selectionBackground: #add6ff;
+    --vscode-input-background: #ffffff;
+    --vscode-input-foreground: #3b3b3b;
+    --vscode-input-border: #cecece;
+    --vscode-button-background: #005fb8;
+    --vscode-button-foreground: #ffffff;
+    --vscode-editor-font-family: Consolas, 'Courier New', monospace;
+    --vscode-editor-font-size: 14px;
+  }
+</style>
+<link rel="stylesheet" href="/dist/webview/main.css">
+</head>
+<body class="vscode-dark">
+<div id="root"></div>
+<script>
+  // Fake extension host: keeps the document text, applies edits, acknowledges them.
+  const params = new URLSearchParams(location.search);
+  if (params.get('theme') === 'light') document.body.className = 'vscode-light';
+  const file = params.get('file') || 'showcase.md';
+  const host = {
+    text: '',
+    version: 1,
+    messages: [],
+    edits: 0,
+    send(message) {
+      window.postMessage(message, '*');
+    },
+    external(text) {
+      host.text = text;
+      host.version++;
+      host.send({ type: 'update', text, version: host.version });
+    },
+    config: { syntaxReveal: true, syncDelay: 50, mermaidEnabled: true, maxWidth: '900px' },
+    get editor() {
+      return window.liveMarkdown.editor;
+    },
+    /** Document position after the `occurrence`-th match of `needle` in a text node. */
+    find(needle, occurrence = 0) {
+      let found = null;
+      let count = 0;
+      host.editor.state.doc.descendants((node, pos) => {
+        if (found !== null) return false;
+        if (node.isText) {
+          let idx = node.text.indexOf(needle);
+          while (idx >= 0) {
+            if (count++ === occurrence) {
+              found = pos + idx + needle.length;
+              return false;
+            }
+            idx = node.text.indexOf(needle, idx + 1);
+          }
+        }
+        return true;
+      });
+      if (found === null) throw new Error('not found: ' + needle);
+      return found;
+    },
+    select(from, to = from) {
+      const editor = host.editor;
+      editor.commands.setTextSelection({ from, to });
+      editor.view.focus();
+    },
+    /** Type `text` after `needle` like a user would (input rules apply). */
+    type(needle, text, occurrence = 0) {
+      const view = host.editor.view;
+      host.select(host.find(needle, occurrence));
+      for (const ch of text) {
+        const { from, to } = view.state.selection;
+        const handled = view.someProp('handleTextInput', (f) => f(view, from, to, ch, () => view.state.tr.insertText(ch, from, to)));
+        if (!handled) view.dispatch(view.state.tr.insertText(ch, from, to));
+      }
+    },
+    key(name) {
+      const view = host.editor.view;
+      const event = new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true });
+      return view.someProp('handleKeyDown', (f) => f(view, event));
+    },
+    /** Lines changed between the initial text and the current host text. */
+    diff() {
+      const a = host.initial.split('\n');
+      const b = host.text.split('\n');
+      let s = 0;
+      while (s < a.length && s < b.length && a[s] === b[s]) s++;
+      let ea = a.length;
+      let eb = b.length;
+      while (ea > s && eb > s && a[ea - 1] === b[eb - 1]) { ea--; eb--; }
+      return { removed: a.slice(s, ea), added: b.slice(s, eb) };
+    },
+    settle(ms = 200) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+  };
+  window.__host = host;
+  window.vscodeApi = {
+    postMessage(message) {
+      host.messages.push(message);
+      if (message.type === 'ready') {
+        fetch('/fixtures/' + file).then((r) => r.text()).then((text) => {
+          host.text = text.replace(/\r\n/g, '\n');
+          host.initial = host.text;
+          host.send({ type: 'init', text: host.text, version: host.version, config: host.config, documentUri: 'file:///' + file, baseUri: location.origin + '/fixtures/', fileName: file });
+        });
+      } else if (message.type === 'edit') {
+        host.edits++;
+        host.text = message.text;
+        host.version++;
+        host.send({ type: 'ack', editId: message.editId, version: host.version });
+      } else if (message.type === 'log' || message.type === 'error') {
+        console.warn('[webview]', message.message, message.detail || '');
+      }
+    },
+  };
+</script>
+<script type="module" src="/dist/webview/main.js"></script>
+</body>
+</html>
