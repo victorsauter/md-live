@@ -4,9 +4,25 @@ import * as vscode from 'vscode';
 
 export const VIEW_TYPE = 'liveMarkdown.editor';
 
+export interface TestProbe {
+  editable: boolean;
+  status: string;
+  textContent: string;
+  mermaid: { blocks: number; svg: number; errors: number };
+  highlightedTokens: number;
+  errors: string[];
+}
+
+export type TestAction =
+  | { kind: 'probe' }
+  | { kind: 'replaceText'; needle: string; text: string; occurrence?: number }
+  | { kind: 'toggleMark'; needle: string; mark: 'bold' | 'italic' | 'strike' | 'code'; occurrence?: number }
+  | { kind: 'undo' };
+
 export interface ProviderHooks {
   whenReady(document: vscode.TextDocument, timeoutMs?: number): Promise<boolean>;
   simulateWebviewEdit(document: vscode.TextDocument, text: string, baseVersion?: number): Promise<void>;
+  runWebviewTest(document: vscode.TextDocument, action: TestAction, timeoutMs?: number): Promise<TestProbe>;
   readonly openEditorCount: number;
 }
 

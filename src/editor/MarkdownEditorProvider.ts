@@ -1,5 +1,12 @@
 import * as vscode from 'vscode';
-import type { HostToWebviewMessage, LiveMarkdownConfig, WebviewToHostMessage } from '../../shared/protocol';
+import type {
+  HostToWebviewMessage,
+  LiveMarkdownConfig,
+  TestAction,
+  TestProbe,
+  TestResultMessage,
+  WebviewToHostMessage,
+} from '../../shared/protocol';
 import { SyncSession } from './SyncSession';
 
 export const VIEW_TYPE = 'liveMarkdown.editor';
@@ -39,6 +46,8 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
   private readonly entries = new Set<EditorEntry>();
   private activeEntry: EditorEntry | undefined;
   private readonly output: vscode.LogOutputChannel;
+  private readonly testWaiters = new Map<number, (message: TestResultMessage) => void>();
+  private testId = 0;
 
   constructor(private readonly context: vscode.ExtensionContext) {
     this.output = vscode.window.createOutputChannel('Live Markdown', { log: true });
@@ -111,6 +120,25 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     await entry.session.handleEdit({ type: 'edit', text, baseVersion, editId: Date.now() });
   }
 
+  /** Run an automation action in the real webview of `document` (test mode only). */
+  runWebviewTest(document: vscode.TextDocument, action: TestAction, timeoutMs = 10000): Promise<TestProbe> {
+    const entry = [...this.entries].find((x) => x.document === document && x.ready);
+    if (!entry) return Promise.reject(new Error('no ready Live editor for document'));
+    const id = ++this.testId;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.testWaiters.delete(id);
+        reject(new Error(`webview test action timed out: ${action.kind}`));
+      }, timeoutMs);
+      this.testWaiters.set(id, (message) => {
+        clearTimeout(timer);
+        if (message.ok && message.result) resolve(message.result);
+        else reject(new Error(message.error ?? 'webview test action failed'));
+      });
+      void entry.panel.webview.postMessage({ type: 'test', id, action } satisfies HostToWebviewMessage);
+    });
+  }
+
   async resolveCustomTextEditor(
     document: vscode.TextDocument,
     panel: vscode.WebviewPanel,
@@ -138,6 +166,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
         documentUri: document.uri.toString(),
         baseUri: webview.asWebviewUri(docFolder).toString() + '/',
         fileName: vscode.workspace.asRelativePath(document.uri),
+        testMode: this.context.extensionMode === vscode.ExtensionMode.Test,
       });
     };
 
@@ -171,6 +200,12 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           case 'log':
             this.log(message.message);
             break;
+          case 'testResult': {
+            const waiter = this.testWaiters.get(message.id);
+            this.testWaiters.delete(message.id);
+            waiter?.(message);
+            break;
+          }
         }
       }),
       panel.onDidChangeViewState(() => {
@@ -243,10 +278,13 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 <script nonce="${n}">
   // Acquire the API once and report load/runtime errors to the extension host.
   window.vscodeApi = acquireVsCodeApi();
+  window.__lmErrors = [];
   window.addEventListener('error', (e) => {
+    if (e instanceof ErrorEvent) window.__lmErrors.push(String(e.message) + ' ' + (e.filename || ''));
     window.vscodeApi.postMessage({ type: 'log', message: 'webview error: ' + (e.message || e.type) + ' ' + (e.filename || (e.target && e.target.src) || '') });
   }, true);
   window.addEventListener('unhandledrejection', (e) => {
+    window.__lmErrors.push('unhandled rejection: ' + String(e.reason && (e.reason.message || e.reason)));
     window.vscodeApi.postMessage({ type: 'log', message: 'webview unhandled rejection: ' + String(e.reason && (e.reason.stack || e.reason)) });
   });
 </script>

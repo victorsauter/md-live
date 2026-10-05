@@ -22,6 +22,8 @@ export interface InitMessage {
   baseUri: string;
   /** Workspace-relative or absolute file name, for display. */
   fileName: string;
+  /** Enables `test` messages (extension running in test mode only). */
+  testMode?: boolean;
 }
 
 export interface UpdateMessage {
@@ -57,8 +59,31 @@ export interface CommandMessage {
   command: 'undo' | 'redo' | 'find';
 }
 
+/** Automation hooks used by the integration tests to drive the real webview editor. */
+export type TestAction =
+  | { kind: 'probe' }
+  | { kind: 'replaceText'; needle: string; text: string; occurrence?: number }
+  | { kind: 'toggleMark'; needle: string; mark: 'bold' | 'italic' | 'strike' | 'code'; occurrence?: number }
+  | { kind: 'undo' };
+
+export interface TestProbe {
+  editable: boolean;
+  status: string;
+  textContent: string;
+  mermaid: { blocks: number; svg: number; errors: number };
+  highlightedTokens: number;
+  errors: string[];
+}
+
+export interface TestRequestMessage {
+  type: 'test';
+  id: number;
+  action: TestAction;
+}
+
 export type HostToWebviewMessage =
   | InitMessage
+  | TestRequestMessage
   | UpdateMessage
   | AckMessage
   | RejectMessage
@@ -105,8 +130,17 @@ export interface LogMessage {
   message: string;
 }
 
+export interface TestResultMessage {
+  type: 'testResult';
+  id: number;
+  ok: boolean;
+  result?: TestProbe;
+  error?: string;
+}
+
 export type WebviewToHostMessage =
   | ReadyMessage
+  | TestResultMessage
   | EditMessage
   | FlushedMessage
   | OpenLinkMessage

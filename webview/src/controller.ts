@@ -13,6 +13,7 @@ import { isDarkTheme, resetMermaidTheme } from './editor/mermaid';
 import { rerenderMermaidDiagrams, wikilinkTarget } from './editor/nodeviews';
 import type { EditorServices } from './editor/services';
 import { syntaxRevealKey } from './editor/syntax';
+import { runTestAction } from './testHooks';
 import type { VsCodeApi } from './vscode';
 
 export const DEFAULT_CONFIG: LiveMarkdownConfig = {
@@ -39,6 +40,8 @@ export class LiveEditorController {
   fileName = '';
   private readonly listeners = new Set<Listener>();
   private lastReportedError: string | null = null;
+  private status: SyncStatus = { kind: 'synced' };
+  private testMode = false;
 
   constructor(private readonly vscode: VsCodeApi) {
     this.element = document.createElement('div');
@@ -82,6 +85,7 @@ export class LiveEditorController {
   }
 
   private onStatus(status: SyncStatus): void {
+    this.status = status;
     if (status.kind === 'error' && status.message !== this.lastReportedError) {
       this.lastReportedError = status.message;
       this.vscode.postMessage({ type: 'log', message: `edit not written (kept in the editor): ${status.message}` });
@@ -94,6 +98,7 @@ export class LiveEditorController {
       case 'init': {
         this.baseUri = message.baseUri;
         this.fileName = message.fileName;
+        this.testMode = message.testMode === true;
         this.applyConfig(message.config);
         this.client.handleMessage(message);
         this.editor.setEditable(true);
@@ -106,6 +111,15 @@ export class LiveEditorController {
       case 'flush':
         this.client.send();
         this.vscode.postMessage({ type: 'flushed', requestId: message.requestId });
+        break;
+      case 'test':
+        if (!this.testMode) break;
+        try {
+          const result = runTestAction(this.editor, message.action, this.status.kind);
+          this.vscode.postMessage({ type: 'testResult', id: message.id, ok: true, result });
+        } catch (error) {
+          this.vscode.postMessage({ type: 'testResult', id: message.id, ok: false, error: String(error) });
+        }
         break;
       case 'command':
         if (message.command === 'undo') this.editor.commands.undo();
