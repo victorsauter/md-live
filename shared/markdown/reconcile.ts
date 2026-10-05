@@ -105,9 +105,10 @@ export function reconcile(state: EditorState, text: string, schema: Schema = sta
     });
     for (const { node, sid } of missing) {
       const pos = positions.get(node);
-      if (pos !== undefined) tr.setNodeAttribute(tr.mapping.map(pos), 'sid', sid);
+      // Positions are taken from tr.doc and attribute steps do not move content: no mapping needed.
+      if (pos !== undefined) tr.setNodeAttribute(pos, 'sid', sid);
     }
   }
-  if (tr) tr.setMeta('addToHistory', false).setMeta('liveMarkdownExternal', true);
+  if (tr) tr.setMeta('addToHistory', false).setMeta('liveMarkdownExternal', true).setMeta('preventAutolink', true);
   return { base, tr };
 }

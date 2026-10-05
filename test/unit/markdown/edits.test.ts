@@ -76,6 +76,17 @@ describe('targeted edits change a single line', () => {
     expect(d.added[0]).toMatch(/^\| one {3}\| deux\s*\|$/);
   });
 
+  it('column alignment change only rewrites the delimiter row', () => {
+    const out = edit(DOC, (tr, doc) => {
+      doc.descendants((node, pos) => {
+        if (node.type.name === 'tableHeader' || node.type.name === 'tableCell') {
+          if (node.textContent === 'col b' || node.textContent === 'two') tr.setNodeAttribute(pos, 'align', 'center');
+        }
+      });
+    });
+    oneLine(DOC, out, '|:------|------:|', '|:------|:-----:|');
+  });
+
   it('code block line', () => {
     const out = edit(DOC, replaceText('y = 2', 'y = 3'));
     oneLine(DOC, out, 'const y = 2;', 'const y = 3;');

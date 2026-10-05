@@ -36,6 +36,7 @@ interface Ctx {
   defs: DefinitionSuffix;
   /** Bullet / delimiter actually written for each list (to keep adjacent lists separate). */
   markers: WeakMap<PMNode, string>;
+  trustRaw?: boolean;
 }
 
 interface DefinitionSuffix {
@@ -474,6 +475,27 @@ function delimiterRow(aligns: Array<string | null>): string {
   return '| ' + aligns.map(cell).join(' | ') + ' |';
 }
 
+/** Rewrite the alignment colons of an existing delimiter row, keeping its pipes, padding and widths. */
+function patchDelimiterRow(line: string, aligns: Array<string | null>): string | null {
+  const m = /^(\s*)(\|?)(.*?)(\|?)(\s*)$/.exec(line);
+  if (!m) return null;
+  const cells = m[3]!.split('|');
+  if (cells.length !== aligns.length) return null;
+  const out: string[] = [];
+  for (const [i, cell] of cells.entries()) {
+    const core = cell.trim();
+    if (!/^:?-+:?$/.test(core)) return null;
+    const lead = /^\s*/.exec(cell)![0];
+    const trail = /\s*$/.exec(cell)![0];
+    const a = aligns[i];
+    const left = a === 'left' || a === 'center';
+    const right = a === 'right' || a === 'center';
+    const dashes = Math.max(1, Math.max(core.length, 3) - (left ? 1 : 0) - (right ? 1 : 0));
+    out.push(lead + (left ? ':' : '') + '-'.repeat(dashes) + (right ? ':' : '') + trail);
+  }
+  return m[1]! + m[2]! + out.join('|') + m[4]! + m[5]!;
+}
+
 function cellContent(ctx: Ctx, cell: PMNode, co: Origin | null): string {
   if (co && co.contentStart !== undefined) {
     if (cell.content.size === 0) return '';
@@ -523,13 +545,20 @@ function table(ctx: Ctx, node: PMNode, R: string, o: Origin): string {
   const origHeader = o.node.firstChild;
   const origColumns = Math.max(0, ...o.node.children.map((row) => row.childCount));
   let delimChanged = columns !== origColumns || o.delimLine === undefined;
+  let alignsChanged = false;
   if (!delimChanged && origHeader) {
     for (let i = 0; i < columns; i++) {
       const before = i < origHeader.childCount ? ((origHeader.child(i).attrs.align as string | null) ?? null) : null;
-      if (before !== aligns[i]) delimChanged = true;
+      if (before !== aligns[i]) alignsChanged = true;
     }
   }
-  const delim = delimChanged ? delimiterRow(aligns) : o.delimLine!;
+  let delim = o.delimLine ?? '';
+  if (alignsChanged) {
+    const patched = patchDelimiterRow(delim, aligns);
+    if (patched === null) delimChanged = true;
+    else delim = patched;
+  }
+  if (delimChanged) delim = delimiterRow(aligns);
   let out = '';
   let prev: Placed | null = null;
   rows.forEach((row, i) => {
@@ -538,7 +567,7 @@ function table(ctx: Ctx, node: PMNode, R: string, o: Origin): string {
     if (prev) {
       const oa = prev.origin;
       const adjacent = oa && ro && oa.parent === ro.parent && ro.index === oa.index + 1;
-      if (i === 1) out += adjacent && !delimChanged ? reprefix(ctx.src.slice(oa.end, ro.start), o.R, R) : '\n' + R + delim + '\n' + R;
+      if (i === 1) out += adjacent && !delimChanged && !alignsChanged ? reprefix(ctx.src.slice(oa.end, ro.start), o.R, R) : '\n' + R + delim + '\n' + R;
       else out += adjacent ? reprefix(ctx.src.slice(oa.end, ro.start), o.R, R) : '\n' + R;
     }
     out += text;
@@ -644,6 +673,7 @@ function mentionsReferences(node: PMNode): boolean {
 }
 
 function verifyBlock(ctx: Ctx, text: string, node: PMNode): boolean {
+  if (ctx.trustRaw) return true;
   const suffix = ctx.defs;
   try {
     const parsed = parseMarkdown(suffix.text ? text + '\n\n' + suffix.text : text, node.type.schema).doc;
@@ -727,7 +757,15 @@ function assemble(ctx: Ctx, doc: PMNode, regenerate: boolean): { text: string; p
  * Serialize `doc` to Markdown, reusing the original source described by `base`.
  * Throws `SerializeError` when the document cannot be written without changing its meaning.
  */
-export function serializeMarkdown(doc: PMNode, base: SourceBase): string {
+export interface SerializeOptions {
+  /**
+   * The user edited the Markdown source of raw nodes: write it verbatim without semantic
+   * verification. The caller must re-parse the result, whose meaning may differ from `doc`.
+   */
+  trustRaw?: boolean;
+}
+
+export function serializeMarkdown(doc: PMNode, base: SourceBase, options: SerializeOptions = {}): string {
   const defs = definitionSuffix(doc, base);
   const ctx: Ctx = {
     base,
@@ -736,7 +774,9 @@ export function serializeMarkdown(doc: PMNode, base: SourceBase): string {
     used: new Set(),
     defs,
     markers: new WeakMap(),
+    trustRaw: options.trustRaw ?? false,
   };
+  if (ctx.trustRaw) return assemble(ctx, doc, false).text;
   const expected = canonicalBlocks(doc.children, defs.footnotes);
   for (const regenerate of [false, true]) {
     const { text, parts } = assemble(ctx, doc, regenerate);
