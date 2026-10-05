@@ -1,16 +1,10 @@
 import * as vscode from 'vscode';
 import type { EditMessage, HostToWebviewMessage } from '../../shared/protocol';
+import { fromLf, toLf } from '../../shared/eol';
 import { applyEdits, computeEdits, mergeEdits } from '../../shared/textdiff';
 
 const KNOWN_TEXT_HISTORY = 50;
 
-export function toLf(text: string): string {
-  return text.indexOf('\r') === -1 ? text : text.replace(/\r\n?/g, '\n');
-}
-
-export function fromLf(text: string, eol: vscode.EndOfLine): string {
-  return eol === vscode.EndOfLine.CRLF ? text.replace(/\n/g, '\r\n') : text;
-}
 
 /**
  * Keeps one webview and one TextDocument in sync.
@@ -127,7 +121,7 @@ export class SyncSession implements vscode.Disposable {
   private async applyText(lfText: string): Promise<boolean> {
     const doc = this.document;
     const oldText = doc.getText();
-    const newText = fromLf(lfText, doc.eol);
+    const newText = fromLf(lfText, doc.eol === vscode.EndOfLine.CRLF);
     const edits = computeEdits(oldText, newText);
     if (edits.length === 0) return true;
     const workspaceEdit = new vscode.WorkspaceEdit();
