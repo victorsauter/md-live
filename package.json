@@ -158,7 +158,7 @@
     "test:integration": "vscode-test",
     "validate:repos": "esbuild scripts/validate-repos.ts --bundle --platform=node --format=esm --outfile=out/validate-repos.mjs --log-level=warning && node out/validate-repos.mjs",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "package": "npm run check && vsce package --no-dependencies",
+    "package": "npm run check && vsce package --no-dependencies --allow-missing-repository",
     "vscode:prepublish": "npm run build:prod"
   },
   "devDependencies": {

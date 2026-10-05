@@ -1,3 +1,5 @@
+# vsce gives negated patterns precedence over exclusions, so this file is an allow-list. Production
+# builds (run by vscode:prepublish) empty dist/ first and emit no source maps.
 **
 !dist/**
 !media/**
@@ -5,4 +7,3 @@
 !README.md
 !CHANGELOG.md
 !LICENSE
-dist/**/*.map

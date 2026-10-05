@@ -1,6 +1,7 @@
 // Builds the two bundles of the extension:
 //  - dist/extension.js      : extension host (Node, CommonJS, `vscode` external)
 //  - dist/webview/main.js   : webview (browser, ESM with code splitting so Mermaid is loaded on demand)
+import { rm } from 'node:fs/promises';
 import * as esbuild from 'esbuild';
 
 const production = process.argv.includes('--production');
@@ -59,5 +60,7 @@ if (watch) {
   const contexts = await Promise.all([esbuild.context(extensionOptions), esbuild.context(webviewOptions)]);
   await Promise.all(contexts.map((c) => c.watch()));
 } else {
+  // Start from an empty folder so stale chunks (and source maps of development builds) are never packaged.
+  await rm('dist', { recursive: true, force: true });
   await Promise.all([esbuild.build(extensionOptions), esbuild.build(webviewOptions)]);
 }
