@@ -1,9 +1,19 @@
 import * as vscode from 'vscode';
+import { ModeCommands } from './commands/commands';
+import { MarkdownEditorProvider } from './editor/MarkdownEditorProvider';
 
-export function activate(_context: vscode.ExtensionContext): void {
-  // Wired up in the next phases.
+export interface LiveMarkdownApi {
+  provider: MarkdownEditorProvider;
+  /** Used by the integration tests to verify they run in an isolated profile. */
+  globalStorageUri: vscode.Uri;
+}
+
+export function activate(context: vscode.ExtensionContext): LiveMarkdownApi {
+  const provider = MarkdownEditorProvider.register(context);
+  new ModeCommands(provider).register(context);
+  return { provider, globalStorageUri: context.globalStorageUri };
 }
 
 export function deactivate(): void {
-  // Nothing to dispose explicitly: everything is registered on the context subscriptions.
+  // Everything is registered on the context subscriptions.
 }
