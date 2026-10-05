@@ -1,0 +1,210 @@
+{
+  "name": "live-markdown-editor",
+  "displayName": "Live Markdown Editor",
+  "description": "Edit Markdown files directly in their rendered form (Obsidian-style Live Preview) while keeping Markdown as the source of truth and Git diffs clean.",
+  "version": "0.1.0",
+  "publisher": "savt",
+  "license": "MIT",
+  "private": true,
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "wysiwyg",
+    "live preview",
+    "editor",
+    "mermaid"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "liveMarkdown.editor",
+        "displayName": "Live Markdown",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          },
+          {
+            "filenamePattern": "*.markdown"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "liveMarkdown.openLive",
+        "title": "Open in Live Editor",
+        "category": "Markdown",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "liveMarkdown.openSource",
+        "title": "Open in Source Editor",
+        "category": "Markdown",
+        "icon": "$(code)"
+      },
+      {
+        "command": "liveMarkdown.openSplit",
+        "title": "Open Source and Live Side by Side",
+        "category": "Markdown",
+        "icon": "$(split-horizontal)"
+      },
+      {
+        "command": "liveMarkdown.toggle",
+        "title": "Toggle Live / Source",
+        "category": "Markdown"
+      },
+      {
+        "command": "liveMarkdown.disableDefault",
+        "title": "Disable Live Markdown as Default Editor",
+        "category": "Live Markdown"
+      },
+      {
+        "command": "liveMarkdown.enableDefault",
+        "title": "Enable Live Markdown as Default Editor",
+        "category": "Live Markdown"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "liveMarkdown.toggle",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m",
+        "when": "activeCustomEditorId == 'liveMarkdown.editor' || (editorTextFocus && editorLangId == 'markdown' && !isInDiffEditor)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "liveMarkdown.openLive",
+          "when": "editorLangId == 'markdown' && !isInDiffEditor && activeCustomEditorId != 'liveMarkdown.editor'",
+          "group": "navigation@-10"
+        },
+        {
+          "command": "liveMarkdown.openSplit",
+          "when": "editorLangId == 'markdown' && !isInDiffEditor && activeCustomEditorId != 'liveMarkdown.editor'",
+          "group": "navigation@-9"
+        },
+        {
+          "command": "liveMarkdown.openSource",
+          "when": "activeCustomEditorId == 'liveMarkdown.editor'",
+          "group": "navigation@-10"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "liveMarkdown.openLive",
+          "when": "editorLangId == 'markdown' || resourceExtname =~ /\\.(md|markdown)$/"
+        },
+        {
+          "command": "liveMarkdown.openSource",
+          "when": "activeCustomEditorId == 'liveMarkdown.editor'"
+        },
+        {
+          "command": "liveMarkdown.openSplit",
+          "when": "editorLangId == 'markdown' || activeCustomEditorId == 'liveMarkdown.editor'"
+        },
+        {
+          "command": "liveMarkdown.toggle",
+          "when": "editorLangId == 'markdown' || activeCustomEditorId == 'liveMarkdown.editor'"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Live Markdown Editor",
+      "properties": {
+        "liveMarkdown.syntaxReveal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reveal Markdown syntax (**, #, [..](..), `) around the element under the cursor, Obsidian-style."
+        },
+        "liveMarkdown.syncDelay": {
+          "type": "number",
+          "default": 120,
+          "minimum": 0,
+          "maximum": 2000,
+          "description": "Delay (ms) before edits made in the Live editor are written to the underlying text document."
+        },
+        "liveMarkdown.mermaid.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render ```mermaid code blocks as diagrams."
+        },
+        "liveMarkdown.maxWidth": {
+          "type": "string",
+          "default": "900px",
+          "description": "Maximum width of the editing column (CSS length, e.g. 900px or 100%)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "build:prod": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p webview/tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "pretest:integration": "npm run build && tsc -p test/integration/tsconfig.json",
+    "test:integration": "vscode-test",
+    "validate:repos": "node --experimental-strip-types scripts/validate-repos.ts",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "package": "npm run check && vsce package --no-dependencies",
+    "vscode:prepublish": "npm run build:prod"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tiptap/core": "^3.31.4",
+    "@tiptap/extension-list": "^3.31.4",
+    "@tiptap/extension-table": "^3.31.4",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/react": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
+    "@types/mdast": "^4.0.4",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "decode-named-character-reference": "^1.3.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
+    "lowlight": "^3.3.0",
+    "mdast-util-from-markdown": "^2.1.0",
+    "mdast-util-frontmatter": "^2.0.1",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-math": "^3.0.0",
+    "mdast-util-to-markdown": "^2.2.0",
+    "mermaid": "^12.1.0",
+    "micromark-extension-frontmatter": "^2.0.0",
+    "micromark-extension-gfm": "^3.0.0",
+    "micromark-extension-math": "^3.1.0",
+    "mocha": "^11.8.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "unified": "^11.0.5",
+    "vitest": "^5.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@vscode/vsce-sign@2.1.0": true
+  }
+}

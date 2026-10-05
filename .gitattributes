@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.png binary
+*.vsix binary
+# Fixtures must stay byte-for-byte identical (CRLF, BOM, trailing whitespace...).
+test/fixtures/** -text
