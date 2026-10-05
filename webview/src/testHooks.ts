@@ -43,6 +43,7 @@ export function probe(editor: Editor, status: string): TestProbe {
       errors: blocks.filter((b) => b.querySelector('.lm-mermaid-error')).length,
     },
     highlightedTokens: document.querySelectorAll('.lm-code [class^="hljs-"]').length,
+    syntax: [...editor.view.dom.querySelectorAll('.lm-syntax')].map((el) => el.textContent ?? ''),
     errors: [...(window.__lmErrors ?? [])],
   };
 }
@@ -64,6 +65,12 @@ export function runTestAction(editor: Editor, action: TestAction, status: string
     case 'undo':
       editor.commands.undo();
       break;
+    case 'select': {
+      const { from } = findText(editor, action.needle, action.occurrence);
+      editor.view.focus();
+      editor.commands.setTextSelection(from + (action.offset ?? 0));
+      break;
+    }
   }
   return probe(editor, status);
 }

@@ -121,4 +121,20 @@ suite('Webview editor (end to end)', () => {
     assert.ok(probe!.highlightedTokens > 0, 'code is highlighted');
     assertNoErrors(probe!);
   });
+
+  test('Markdown syntax is revealed around the element under the cursor', async () => {
+    const { doc, run } = await openLive(SHOWCASE);
+    const revealed = async (action: TestAction, expected: string[]) => {
+      let syntax: string[] = [];
+      await run(action);
+      const matches = async () => JSON.stringify((syntax = (await run({ kind: 'probe' })).syntax)) === JSON.stringify(expected);
+      await waitUntil(matches, 3000, 'revealed syntax').catch(() => assert.deepStrictEqual(syntax, expected));
+    };
+    await revealed({ kind: 'select', needle: 'underscores', offset: 3 }, ['__', '__']);
+    await revealed({ kind: 'select', needle: 'Lists', offset: 2 }, ['## ']);
+    await revealed({ kind: 'select', needle: 'This document', offset: 2 }, []);
+    await sleep(500);
+    assert.strictEqual(doc.isDirty, false, 'revealing syntax never edits the document');
+    assert.strictEqual(doc.getText(), SHOWCASE);
+  });
 });

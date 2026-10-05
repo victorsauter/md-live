@@ -64,7 +64,9 @@ export type TestAction =
   | { kind: 'probe' }
   | { kind: 'replaceText'; needle: string; text: string; occurrence?: number }
   | { kind: 'toggleMark'; needle: string; mark: 'bold' | 'italic' | 'strike' | 'code'; occurrence?: number }
-  | { kind: 'undo' };
+  | { kind: 'undo' }
+  /** Focus the editor and put the cursor `offset` characters into the text `needle`. */
+  | { kind: 'select'; needle: string; offset?: number; occurrence?: number };
 
 export interface TestProbe {
   editable: boolean;
@@ -72,6 +74,8 @@ export interface TestProbe {
   textContent: string;
   mermaid: { blocks: number; svg: number; errors: number };
   highlightedTokens: number;
+  /** Markdown markers currently revealed around the selection (Phase 12). */
+  syntax: string[];
   errors: string[];
 }
 

@@ -804,12 +804,18 @@ input.lm-raw-editor {
   font-style: normal;
   font-size: 0.85em;
   text-decoration: none;
+  white-space: pre;
   user-select: none;
   pointer-events: none;
 }
 
-.lm-syntax-href {
+.lm-syntax-link {
   font-size: 0.8em;
+}
+
+.lm-syntax-block {
+  display: block;
+  line-height: 1.2;
 }
 
 h1 .lm-syntax,
@@ -820,7 +826,6 @@ h5 .lm-syntax,
 h6 .lm-syntax {
   font-size: 0.6em;
   vertical-align: middle;
-  margin-right: 0.3em;
 }
 
 /* ------------------------------------------------------------------ menus and dialogs */
