@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getMarkdownSchema } from '../../../shared/markdown/schema';
 import { parseMarkdown } from '../../../shared/markdown/parse';
 import { serializeMarkdown } from '../../../shared/markdown/serialize';
+import { edit, replaceText } from './helpers';
 
 const schema = getMarkdownSchema();
 
@@ -38,7 +39,22 @@ const samples: Record<string, string> = {
   nestedQuoteList: '> - a\n>   - b\n> 1. c\n',
   emptyItem: '-\n- b\n',
   htmlComment: '<!-- comment -->\n\nText\n',
+  bom: '\uFEFF# Title\n\ntext\n',
+  bomParagraphBeforeFence: '\uFEFF# T\n\n**W:**\n```cs\nx\n```',
 };
+
+describe('byte order mark', () => {
+  it('is kept when the first block changes', () => {
+    expect(edit('\uFEFF# Title\n\ntext\n', replaceText('Title', 'Heading'))).toBe('\uFEFF# Heading\n\ntext\n');
+  });
+
+  it('is kept when the first block is deleted', () => {
+    const out = edit('\uFEFF# Title\n\ntext\n', (tr, doc) => {
+      tr.delete(0, doc.firstChild!.nodeSize);
+    });
+    expect(out).toBe('\uFEFFtext\n');
+  });
+});
 
 describe('golden round trip', () => {
   for (const [name, text] of Object.entries(samples)) {

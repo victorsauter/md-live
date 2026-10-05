@@ -735,11 +735,13 @@ function assemble(ctx: Ctx, doc: PMNode, regenerate: boolean): { text: string; p
   }
   const first = base.rootOrigins[0];
   const last = base.rootOrigins[base.rootOrigins.length - 1];
-  if (parts.length === 0) return { text: first ? '' : src, parts };
-  if (!first || !last) return { text: parts.map((p) => p.text).join('\n\n') + '\n', parts };
+  const bom = src.charCodeAt(0) === 0xfeff ? '\uFEFF' : '';
+  if (parts.length === 0) return { text: first ? bom : src, parts };
+  if (!first || !last) return { text: bom + parts.map((p) => p.text).join('\n\n') + '\n', parts };
   let out = '';
   const leading = src.slice(0, first.start);
-  out += parts[0]!.origin === first ? leading : leading.slice(0, leading.lastIndexOf('\n') + 1);
+  const kept = leading.slice(0, leading.lastIndexOf('\n') + 1);
+  out += parts[0]!.origin === first ? leading : kept.startsWith(bom) ? kept : bom + kept;
   parts.forEach((part, i) => {
     if (i > 0) {
       const a = parts[i - 1]!;
