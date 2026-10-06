@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Live Markdown Editor logo: the Markdown mark whose arrow doubles as a text caret.
+       Rendered to media/icon.png by scripts/generate-icon.ps1. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E293B"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#A78BFA"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38BDF8" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#A78BFA" stop-opacity="0.8"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-30%" width="220%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)"/>
+  <rect x="5.5" y="5.5" width="117" height="117" rx="26.5" fill="none" stroke="url(#rim)" stroke-width="3"/>
+  <path d="M24 90V40l21 24 21-24v50" fill="none" stroke="url(#ink)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <g filter="url(#glow)" fill="#F8FAFC" stroke="#F8FAFC" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M83 38h18" fill="none" stroke-width="7"/>
+    <path d="M92 38v36" fill="none" stroke-width="9"/>
+    <path d="M79 74h26L92 92z" stroke-width="5"/>
+  </g>
+</svg>
