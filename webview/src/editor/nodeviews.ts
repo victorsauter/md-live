@@ -10,7 +10,7 @@ import { renderMermaid } from './mermaid';
 import type { EditorServices } from './services';
 
 /** Spec flag of the node decoration added to the block that contains the selection. */
-export const ACTIVE_SPEC = 'liveMarkdownActive';
+export const ACTIVE_SPEC = 'markliveActive';
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);

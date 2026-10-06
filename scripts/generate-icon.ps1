@@ -9,7 +9,7 @@ $edge = @(
   "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $edge) { throw 'Microsoft Edge was not found.' }
-$profileDir = Join-Path ([IO.Path]::GetTempPath()) "live-markdown-icon-$PID"
+$profileDir = Join-Path ([IO.Path]::GetTempPath()) "marklive-icon-$PID"
 try {
   $url = 'file:///' + ($svg -replace '\\', '/')
   $edgeArgs = @('--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', "--user-data-dir=$profileDir",

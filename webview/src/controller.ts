@@ -5,7 +5,7 @@
 import type { Editor } from '@tiptap/core';
 import { EditorState, TextSelection, type Transaction } from '@tiptap/pm/state';
 import type { Node as PMNode } from '@tiptap/pm/model';
-import type { HostToWebviewMessage, LiveMarkdownConfig } from '../../shared/protocol';
+import type { HostToWebviewMessage, MarkliveConfig } from '../../shared/protocol';
 import { headingAnchors } from '../../shared/slug';
 import { SyncClient, type SyncStatus } from '../../shared/sync/SyncClient';
 import { createEditor } from './editor/createEditor';
@@ -16,7 +16,7 @@ import { syntaxRevealKey } from './editor/syntax';
 import { runTestAction } from './testHooks';
 import type { VsCodeApi } from './vscode';
 
-export const DEFAULT_CONFIG: LiveMarkdownConfig = {
+export const DEFAULT_CONFIG: MarkliveConfig = {
   syntaxReveal: true,
   syncDelay: 120,
   mermaidEnabled: true,
@@ -35,7 +35,7 @@ export class LiveEditorController {
   readonly element: HTMLDivElement;
   readonly editor: Editor;
   readonly client: SyncClient;
-  config: LiveMarkdownConfig = DEFAULT_CONFIG;
+  config: MarkliveConfig = DEFAULT_CONFIG;
   baseUri = '';
   fileName = '';
   private readonly listeners = new Set<Listener>();
@@ -131,7 +131,7 @@ export class LiveEditorController {
     }
   }
 
-  private applyConfig(config: LiveMarkdownConfig): void {
+  private applyConfig(config: MarkliveConfig): void {
     const previous = this.config;
     this.config = config;
     this.client.delay = Math.max(0, config.syncDelay);

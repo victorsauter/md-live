@@ -1,11 +1,11 @@
 ---
-title: Live Markdown showcase
+title: Marklive showcase
 tags: [demo, markdown]
 ---
 
-# Live Markdown showcase
+# Marklive showcase
 
-This document exercises the features of the **Live Markdown Editor**: *emphasis*, __strong with underscores__, ~~strikethrough~~, `inline code`, [links](https://example.com "Example") and <https://autolinks.example>.
+This document exercises the features of **Marklive**: *emphasis*, __strong with underscores__, ~~strikethrough~~, `inline code`, [links](https://example.com "Example") and <https://autolinks.example>.
 
 Setext heading
 --------------

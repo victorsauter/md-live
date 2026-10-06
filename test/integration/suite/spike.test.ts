@@ -21,7 +21,7 @@ suite('Spike: VS Code integration', () => {
   test('workbench undo after a Live edit reverts the TextDocument', async () => {
     const { provider } = await getApi();
     const uri = writeFixture('# Title\n\nHello world\n');
-    await vscode.commands.executeCommand('vscode.openWith', uri, 'liveMarkdown.editor');
+    await vscode.commands.executeCommand('vscode.openWith', uri, 'marklive.editor');
     await waitFor(() => isLiveTab(activeTabInput(), uri));
     const doc = documentFor(uri);
     assert.ok(await provider.whenReady(doc));
@@ -40,7 +40,7 @@ suite('Spike: VS Code integration', () => {
   test('CRLF documents keep CRLF and untouched lines', async () => {
     const { provider } = await getApi();
     const uri = writeFixture('# Title\r\n\r\nline one\r\nline two\r\n');
-    await vscode.commands.executeCommand('vscode.openWith', uri, 'liveMarkdown.editor');
+    await vscode.commands.executeCommand('vscode.openWith', uri, 'marklive.editor');
     await waitFor(() => isLiveTab(activeTabInput(), uri));
     const doc = documentFor(uri);
     assert.ok(await provider.whenReady(doc));

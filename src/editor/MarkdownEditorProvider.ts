@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import type {
   HostToWebviewMessage,
-  LiveMarkdownConfig,
+  MarkliveConfig,
   TestAction,
   TestProbe,
   TestResultMessage,
@@ -9,10 +9,10 @@ import type {
 } from '../../shared/protocol';
 import { SyncSession } from './SyncSession';
 
-export const VIEW_TYPE = 'liveMarkdown.editor';
+export const VIEW_TYPE = 'marklive.editor';
 
-export function readConfig(): LiveMarkdownConfig {
-  const config = vscode.workspace.getConfiguration('liveMarkdown');
+export function readConfig(): MarkliveConfig {
+  const config = vscode.workspace.getConfiguration('marklive');
   return {
     syntaxReveal: config.get<boolean>('syntaxReveal', true),
     syncDelay: config.get<number>('syncDelay', 120),
@@ -50,7 +50,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
   private testId = 0;
 
   constructor(private readonly context: vscode.ExtensionContext) {
-    this.output = vscode.window.createOutputChannel('Live Markdown', { log: true });
+    this.output = vscode.window.createOutputChannel('Marklive', { log: true });
     context.subscriptions.push(
       this.output,
       vscode.workspace.onWillSaveTextDocument((e) => {
@@ -58,7 +58,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
         if (sessions.length > 0) e.waitUntil(Promise.all(sessions.map((s) => s.flush())));
       }),
       vscode.workspace.onDidChangeConfiguration((e) => {
-        if (!e.affectsConfiguration('liveMarkdown')) return;
+        if (!e.affectsConfiguration('marklive')) return;
         const config = readConfig();
         for (const entry of this.entries) void entry.panel.webview.postMessage({ type: 'config', config });
       }),
@@ -87,7 +87,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
   log(message: string): void {
     this.output.info(message);
-    if (this.context.extensionMode === vscode.ExtensionMode.Test) console.log(`[live-markdown] ${message}`);
+    if (this.context.extensionMode === vscode.ExtensionMode.Test) console.log(`[marklive] ${message}`);
   }
 
   /** Send a message to every Live editor showing `document` (used by tests and commands). */
@@ -189,13 +189,13 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
             break;
           case 'switchMode':
             void vscode.commands.executeCommand(
-              message.mode === 'source' ? 'liveMarkdown.openSource' : 'liveMarkdown.openSplit',
+              message.mode === 'source' ? 'marklive.openSource' : 'marklive.openSplit',
               document.uri,
             );
             break;
           case 'error':
             this.output.error(`${message.message}${message.detail ? `\n${message.detail}` : ''}`);
-            void vscode.window.showErrorMessage(`Live Markdown: ${message.message}`);
+            void vscode.window.showErrorMessage(`Marklive: ${message.message}`);
             break;
           case 'log':
             this.log(message.message);
@@ -245,7 +245,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     try {
       await vscode.workspace.fs.stat(target);
     } catch {
-      void vscode.window.showWarningMessage(`Live Markdown: link target not found: ${href}`);
+      void vscode.window.showWarningMessage(`Marklive: link target not found: ${href}`);
       return;
     }
     const withFragment = fragment ? target.with({ fragment }) : target;
@@ -271,7 +271,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 <meta http-equiv="Content-Security-Policy" content="${csp}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="${style.toString()}">
-<title>Live Markdown</title>
+<title>Marklive</title>
 </head>
 <body>
 <div id="root"></div>

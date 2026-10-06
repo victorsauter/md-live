@@ -18,7 +18,7 @@ export { markdownToSlice, sliceToMarkdown };
 
 function clipboardPlugin(): Plugin {
   return new Plugin({
-    key: new PluginKey('liveMarkdownClipboard'),
+    key: new PluginKey('markliveClipboard'),
     props: {
       clipboardTextSerializer: (slice: Slice, view: EditorView) => sliceToMarkdown(slice, view.state.schema),
       clipboardTextParser: (text: string, $context, _plain: boolean, view: EditorView) => {
@@ -69,7 +69,7 @@ function linkAt(state: EditorState, pos: number): string | null {
 
 function linkClickPlugin(services: EditorServices): Plugin {
   return new Plugin({
-    key: new PluginKey('liveMarkdownLinkClick'),
+    key: new PluginKey('markliveLinkClick'),
     props: {
       handleClick(view: EditorView, pos: number, event: MouseEvent) {
         if (!(event.ctrlKey || event.metaKey) || event.button !== 0) return false;
@@ -117,7 +117,7 @@ function normalizeTables(state: EditorState): Transaction | null {
 
 function tablePlugin(): Plugin {
   return new Plugin({
-    key: new PluginKey('liveMarkdownTables'),
+    key: new PluginKey('markliveTables'),
     appendTransaction(transactions, _old, state) {
       if (!transactions.some((tr) => tr.docChanged) || transactions.some((tr) => tr.getMeta(EXTERNAL_META))) return null;
       return normalizeTables(state);
@@ -131,7 +131,7 @@ const ACTIVE_TYPES = new Set(['codeBlock']);
 
 function activeBlockPlugin(): Plugin {
   return new Plugin({
-    key: new PluginKey('liveMarkdownActiveBlock'),
+    key: new PluginKey('markliveActiveBlock'),
     props: {
       decorations(state) {
         const { selection } = state;
@@ -235,7 +235,7 @@ function indentCode(editor: Editor, outdent: boolean): boolean {
 
 export function createBehaviors(services: EditorServices) {
   return Extension.create({
-    name: 'liveMarkdownBehavior',
+    name: 'markliveBehavior',
     priority: 50,
 
     addKeyboardShortcuts() {
@@ -300,7 +300,7 @@ export function createBehaviors(services: EditorServices) {
  * code block's VS Code paste handler (which would wrap pasted Markdown in a fenced block).
  */
 export const MarkdownClipboard = Extension.create({
-  name: 'liveMarkdownClipboard',
+  name: 'markliveClipboard',
   priority: 1000,
   addProseMirrorPlugins() {
     return [clipboardPlugin()];

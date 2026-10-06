@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Markdown — dev harness</title>
+<title>Marklive — dev harness</title>
 <!-- Development harness: runs the webview bundle in a browser with a fake VS Code host. -->
 <style>
   body.vscode-dark {
@@ -87,7 +87,7 @@
     },
     config: { syntaxReveal: true, syncDelay: 50, mermaidEnabled: true, maxWidth: '900px' },
     get editor() {
-      return window.liveMarkdown.editor;
+      return window.marklive.editor;
     },
     /** Document position after the `occurrence`-th match of `needle` in a text node. */
     find(needle, occurrence = 0) {

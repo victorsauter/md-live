@@ -1,8 +1,9 @@
-# Live Markdown Editor
+# Marklive — Live Markdown Editor
 
-A Typora/Obsidian-style **live** Markdown editor for VS Code. Markdown files open in a rich editing
-view where formatting is rendered as you type, while the file on disk stays plain Markdown that
-remains readable, diff-friendly and **byte-for-byte identical** wherever you did not edit.
+**Marklive** is a Typora/Obsidian-style **live** Markdown editor for VS Code. Markdown files open in
+a rich editing view where formatting is rendered as you type, while the file on disk stays plain
+Markdown that remains readable, diff-friendly and **byte-for-byte identical** wherever you did not
+edit.
 
 ## Features
 
@@ -11,7 +12,7 @@ remains readable, diff-friendly and **byte-for-byte identical** wherever you did
   rules, GFM tables and fenced code blocks.
 * **Obsidian-style syntax reveal**: the Markdown markers of the element under the cursor are shown
   around it (`**bold**`, `## Heading`, `[text](https://…)`, `` `code` ``), using the markers of your file
-  (`__` vs `**`, reference links, `<autolinks>`). Turn it off with `liveMarkdown.syntaxReveal`.
+  (`__` vs `**`, reference links, `<autolinks>`). Turn it off with `marklive.syntaxReveal`.
 * **Three modes**: *Live* (rendered editor), *Source* (VS Code's native text editor) and *Split*
   (both side by side, kept in sync through the same `TextDocument`).
 * **Tables**: Tab / Shift+Tab between cells, Enter to move down, toolbar and context menu to add or
@@ -35,12 +36,12 @@ Markdown files (`*.md`, `*.markdown`) open in the Live editor by default.
 
 | Command | Default shortcut | Description |
 |---|---|---|
-| `Markdown: Open in Live Editor` | | Reopen the file in the Live editor |
-| `Markdown: Open in Source Editor` | | Reopen the file in VS Code's text editor |
-| `Markdown: Open Source and Live Side by Side` | | Split mode |
-| `Markdown: Toggle Live / Source` | `Ctrl+Shift+M` / `Cmd+Shift+M` | Switch between Live and Source |
-| `Live Markdown: Disable Live Markdown as Default Editor` | | Open Markdown files in the text editor by default (`workbench.editorAssociations`) |
-| `Live Markdown: Enable Live Markdown as Default Editor` | | Restore the Live editor as default |
+| `Marklive: Open in Live Editor` | | Reopen the file in the Live editor |
+| `Marklive: Open in Source Editor` | | Reopen the file in VS Code's text editor |
+| `Marklive: Open Source and Live Side by Side` | | Split mode |
+| `Marklive: Toggle Live / Source` | `Ctrl+Shift+M` / `Cmd+Shift+M` | Switch between Live and Source |
+| `Marklive: Disable Marklive as Default Editor` | | Open Markdown files in the text editor by default (`workbench.editorAssociations`) |
+| `Marklive: Enable Marklive as Default Editor` | | Restore the Live editor as default |
 
 Switching modes replaces the tab in place (like *Reopen Editor With…*), so unsaved changes are kept
 without a "Save changes?" prompt. The Live editor toolbar also has *Live / Source / Split* buttons.
@@ -67,10 +68,10 @@ puts Markdown on the clipboard.
 
 | Setting | Default | Description |
 |---|---|---|
-| `liveMarkdown.syntaxReveal` | `true` | Reveal Markdown syntax around the element under the cursor |
-| `liveMarkdown.syncDelay` | `120` | Delay (ms) before Live edits are written to the text document |
-| `liveMarkdown.mermaid.enabled` | `true` | Render Mermaid code blocks as diagrams |
-| `liveMarkdown.maxWidth` | `900px` | Maximum width of the editing column |
+| `marklive.syntaxReveal` | `true` | Reveal Markdown syntax around the element under the cursor |
+| `marklive.syncDelay` | `120` | Delay (ms) before Live edits are written to the text document |
+| `marklive.mermaid.enabled` | `true` | Render Mermaid code blocks as diagrams |
+| `marklive.maxWidth` | `900px` | Maximum width of the editing column |
 
 ## Architecture
 
@@ -174,7 +175,7 @@ npm run lint
 npm test               # unit tests (Vitest)
 npm run test:integration
 npm run check          # typecheck + lint + unit tests + build
-npm run package        # check + live-markdown-editor-<version>.vsix
+npm run package        # check + marklive-<version>.vsix
 ```
 
 `node dev/serve.mjs` serves `dev/harness/index.html`, a browser harness that runs the webview with a
@@ -183,7 +184,7 @@ fake host (useful to debug the editor with browser dev tools).
 `media/icon.png` is rendered from `media/logo.svg` by `scripts/generate-icon.ps1` (Windows, headless
 Microsoft Edge).
 
-Install the packaged extension with `code --install-extension live-markdown-editor-0.1.0.vsix`.
+Install the packaged extension with `code --install-extension marklive-0.1.0.vsix`.
 
 ### Integration tests
 

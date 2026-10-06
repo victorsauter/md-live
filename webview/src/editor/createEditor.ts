@@ -13,7 +13,7 @@ import { syntaxRevealPlugin } from './syntax';
 import { TableKeys } from './table';
 
 const Highlight = Extension.create({
-  name: 'liveMarkdownHighlight',
+  name: 'markliveHighlight',
   addProseMirrorPlugins() {
     return [highlightPlugin()];
   },
@@ -49,7 +49,7 @@ export function createEditor({ element, services, onTransaction }: CreateEditorO
     Placeholder.configure({ placeholder: 'Start writing…', showOnlyCurrent: false }),
     Highlight,
     Extension.create({
-      name: 'liveMarkdownSyntax',
+      name: 'markliveSyntax',
       addProseMirrorPlugins: () => [syntaxRevealPlugin(services)],
     }),
     TableKeys,

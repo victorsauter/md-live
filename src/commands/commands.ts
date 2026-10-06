@@ -28,12 +28,12 @@ export class ModeCommands {
 
   register(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
-      vscode.commands.registerCommand('liveMarkdown.openLive', (uri?: vscode.Uri) => this.openLive(uri, true)),
-      vscode.commands.registerCommand('liveMarkdown.openSource', (uri?: vscode.Uri) => this.openSource(uri, true)),
-      vscode.commands.registerCommand('liveMarkdown.openSplit', (uri?: vscode.Uri) => this.openSplit(uri)),
-      vscode.commands.registerCommand('liveMarkdown.toggle', (uri?: vscode.Uri) => this.toggle(uri)),
-      vscode.commands.registerCommand('liveMarkdown.disableDefault', (scope?: unknown) => this.setDefault(false, scope)),
-      vscode.commands.registerCommand('liveMarkdown.enableDefault', (scope?: unknown) => this.setDefault(true, scope)),
+      vscode.commands.registerCommand('marklive.openLive', (uri?: vscode.Uri) => this.openLive(uri, true)),
+      vscode.commands.registerCommand('marklive.openSource', (uri?: vscode.Uri) => this.openSource(uri, true)),
+      vscode.commands.registerCommand('marklive.openSplit', (uri?: vscode.Uri) => this.openSplit(uri)),
+      vscode.commands.registerCommand('marklive.toggle', (uri?: vscode.Uri) => this.toggle(uri)),
+      vscode.commands.registerCommand('marklive.disableDefault', (scope?: unknown) => this.setDefault(false, scope)),
+      vscode.commands.registerCommand('marklive.enableDefault', (scope?: unknown) => this.setDefault(true, scope)),
     );
   }
 
@@ -75,7 +75,7 @@ export class ModeCommands {
   async openLive(uri: vscode.Uri | undefined, replace: boolean): Promise<void> {
     const target = this.targetUri(uri);
     if (!target) {
-      void vscode.window.showInformationMessage('Live Markdown: no Markdown document to open.');
+      void vscode.window.showInformationMessage('Marklive: no Markdown document to open.');
       return;
     }
     const group = vscode.window.tabGroups.activeTabGroup;
@@ -147,7 +147,7 @@ export class ModeCommands {
     await config.update('editorAssociations', Object.keys(current).length ? current : undefined, target);
     void vscode.window.showInformationMessage(
       enabled
-        ? 'Live Markdown is now the default editor for Markdown files.'
+        ? 'Marklive is now the default editor for Markdown files.'
         : 'Markdown files now open in the standard text editor. Use "Open in Live Editor" to switch.',
     );
   }

@@ -1,9 +1,9 @@
-import type { LiveMarkdownConfig } from '../../../shared/protocol';
+import type { MarkliveConfig } from '../../../shared/protocol';
 import type { DocStyle } from '../../../shared/markdown/types';
 
 /** What the editor extensions need from the surrounding webview. */
 export interface EditorServices {
-  config(): LiveMarkdownConfig;
+  config(): MarkliveConfig;
   style(): DocStyle | undefined;
   /** Webview URI to display an image whose Markdown `src` is given (the `src` itself is kept). */
   resolveSrc(src: string): string;

@@ -38,7 +38,7 @@ async function waitUntil(fn: () => boolean | Promise<boolean>, timeoutMs: number
 async function openLive(content: string) {
   const { provider } = await getApi();
   const uri = writeFixture(content, 'webview');
-  await vscode.commands.executeCommand('vscode.openWith', uri, 'liveMarkdown.editor');
+  await vscode.commands.executeCommand('vscode.openWith', uri, 'marklive.editor');
   await waitUntil(() => isLiveTab(activeTabInput(), uri), 10000, 'live tab');
   const doc = documentFor(uri);
   assert.ok(await provider.whenReady(doc), 'webview ready');

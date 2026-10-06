@@ -8,7 +8,7 @@ import './styles.css';
 const vscode = getVsCodeApi();
 const controller = new LiveEditorController(vscode);
 // Debug handle (developer tools / dev harness).
-(window as unknown as { liveMarkdown: LiveEditorController }).liveMarkdown = controller;
+(window as unknown as { marklive: LiveEditorController }).marklive = controller;
 
 window.addEventListener('message', (event: MessageEvent<HostToWebviewMessage>) => {
   const message = event.data;

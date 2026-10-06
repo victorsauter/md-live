@@ -10,7 +10,7 @@ import { syntaxMarkers, type SyntaxMarker } from '../../../shared/markdown/synta
 import type { EditorServices } from './services';
 
 /** Dispatch a transaction with `setMeta(syntaxRevealKey, { refresh: true })` to redraw the markers. */
-export const syntaxRevealKey = new PluginKey('liveMarkdownSyntaxReveal');
+export const syntaxRevealKey = new PluginKey('markliveSyntaxReveal');
 
 function render(marker: SyntaxMarker): HTMLElement {
   const span = document.createElement('span');

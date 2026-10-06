@@ -151,7 +151,7 @@ function buildDecorations(doc: PMNode): DecorationSet {
   return DecorationSet.create(doc, decorations);
 }
 
-export const highlightKey = new PluginKey<DecorationSet>('liveMarkdownHighlight');
+export const highlightKey = new PluginKey<DecorationSet>('markliveHighlight');
 
 export function highlightPlugin(): Plugin<DecorationSet> {
   return new Plugin<DecorationSet>({

@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 
-export const VIEW_TYPE = 'liveMarkdown.editor';
+export const VIEW_TYPE = 'marklive.editor';
 
 export interface TestProbe {
   editable: boolean;
@@ -31,7 +31,7 @@ export interface ProviderHooks {
 }
 
 export async function getApi(): Promise<{ provider: ProviderHooks; globalStorageUri: vscode.Uri }> {
-  const ext = vscode.extensions.getExtension('savt.live-markdown-editor');
+  const ext = vscode.extensions.getExtension('savt.marklive');
   if (!ext) throw new Error('extension not found');
   return (await ext.activate()) as { provider: ProviderHooks; globalStorageUri: vscode.Uri };
 }

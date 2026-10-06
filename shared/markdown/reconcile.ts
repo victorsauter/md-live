@@ -109,6 +109,6 @@ export function reconcile(state: EditorState, text: string, schema: Schema = sta
       if (pos !== undefined) tr.setNodeAttribute(pos, 'sid', sid);
     }
   }
-  if (tr) tr.setMeta('addToHistory', false).setMeta('liveMarkdownExternal', true).setMeta('preventAutolink', true);
+  if (tr) tr.setMeta('addToHistory', false).setMeta('markliveExternal', true).setMeta('preventAutolink', true);
   return { base, tr };
 }

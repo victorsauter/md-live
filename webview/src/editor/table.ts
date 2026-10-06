@@ -107,7 +107,7 @@ function moveDown(editor: Editor): boolean {
  * (they cannot be written inside a table row).
  */
 export const TableKeys = Extension.create({
-  name: 'liveMarkdownTableKeys',
+  name: 'markliveTableKeys',
   priority: 200,
   addKeyboardShortcuts() {
     const inCell = () => tableContext(this.editor.state) !== null;

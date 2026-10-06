@@ -19,7 +19,7 @@ import type { DocStyle, SourceBase } from '../markdown/types';
 import type { EditMessage, HostToWebviewMessage, UpdateMessage } from '../protocol';
 
 /** Transaction meta set on changes that come from the host (never sent back). */
-export const EXTERNAL_META = 'liveMarkdownExternal';
+export const EXTERNAL_META = 'markliveExternal';
 
 export type SyncStatus =
   | { kind: 'synced' }

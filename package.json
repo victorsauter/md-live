@@ -1,6 +1,6 @@
 {
-  "name": "live-markdown-editor",
-  "displayName": "Live Markdown Editor",
+  "name": "marklive",
+  "displayName": "Marklive — Live Markdown Editor",
   "description": "Edit Markdown files directly in their rendered form (Obsidian-style Live Preview) while keeping Markdown as the source of truth and Git diffs clean.",
   "version": "0.1.0",
   "publisher": "savt",
@@ -25,8 +25,8 @@
   "contributes": {
     "customEditors": [
       {
-        "viewType": "liveMarkdown.editor",
-        "displayName": "Live Markdown",
+        "viewType": "marklive.editor",
+        "displayName": "Marklive",
         "selector": [
           {
             "filenamePattern": "*.md"
@@ -40,105 +40,105 @@
     ],
     "commands": [
       {
-        "command": "liveMarkdown.openLive",
+        "command": "marklive.openLive",
         "title": "Open in Live Editor",
-        "category": "Markdown",
+        "category": "Marklive",
         "icon": "$(preview)"
       },
       {
-        "command": "liveMarkdown.openSource",
+        "command": "marklive.openSource",
         "title": "Open in Source Editor",
-        "category": "Markdown",
+        "category": "Marklive",
         "icon": "$(code)"
       },
       {
-        "command": "liveMarkdown.openSplit",
+        "command": "marklive.openSplit",
         "title": "Open Source and Live Side by Side",
-        "category": "Markdown",
+        "category": "Marklive",
         "icon": "$(split-horizontal)"
       },
       {
-        "command": "liveMarkdown.toggle",
+        "command": "marklive.toggle",
         "title": "Toggle Live / Source",
-        "category": "Markdown"
+        "category": "Marklive"
       },
       {
-        "command": "liveMarkdown.disableDefault",
-        "title": "Disable Live Markdown as Default Editor",
-        "category": "Live Markdown"
+        "command": "marklive.disableDefault",
+        "title": "Disable Marklive as Default Editor",
+        "category": "Marklive"
       },
       {
-        "command": "liveMarkdown.enableDefault",
-        "title": "Enable Live Markdown as Default Editor",
-        "category": "Live Markdown"
+        "command": "marklive.enableDefault",
+        "title": "Enable Marklive as Default Editor",
+        "category": "Marklive"
       }
     ],
     "keybindings": [
       {
-        "command": "liveMarkdown.toggle",
+        "command": "marklive.toggle",
         "key": "ctrl+shift+m",
         "mac": "cmd+shift+m",
-        "when": "activeCustomEditorId == 'liveMarkdown.editor' || (editorTextFocus && editorLangId == 'markdown' && !isInDiffEditor)"
+        "when": "activeCustomEditorId == 'marklive.editor' || (editorTextFocus && editorLangId == 'markdown' && !isInDiffEditor)"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "liveMarkdown.openLive",
-          "when": "editorLangId == 'markdown' && !isInDiffEditor && activeCustomEditorId != 'liveMarkdown.editor'",
+          "command": "marklive.openLive",
+          "when": "editorLangId == 'markdown' && !isInDiffEditor && activeCustomEditorId != 'marklive.editor'",
           "group": "navigation@-10"
         },
         {
-          "command": "liveMarkdown.openSplit",
-          "when": "editorLangId == 'markdown' && !isInDiffEditor && activeCustomEditorId != 'liveMarkdown.editor'",
+          "command": "marklive.openSplit",
+          "when": "editorLangId == 'markdown' && !isInDiffEditor && activeCustomEditorId != 'marklive.editor'",
           "group": "navigation@-9"
         },
         {
-          "command": "liveMarkdown.openSource",
-          "when": "activeCustomEditorId == 'liveMarkdown.editor'",
+          "command": "marklive.openSource",
+          "when": "activeCustomEditorId == 'marklive.editor'",
           "group": "navigation@-10"
         }
       ],
       "commandPalette": [
         {
-          "command": "liveMarkdown.openLive",
+          "command": "marklive.openLive",
           "when": "editorLangId == 'markdown' || resourceExtname =~ /\\.(md|markdown)$/"
         },
         {
-          "command": "liveMarkdown.openSource",
-          "when": "activeCustomEditorId == 'liveMarkdown.editor'"
+          "command": "marklive.openSource",
+          "when": "activeCustomEditorId == 'marklive.editor'"
         },
         {
-          "command": "liveMarkdown.openSplit",
-          "when": "editorLangId == 'markdown' || activeCustomEditorId == 'liveMarkdown.editor'"
+          "command": "marklive.openSplit",
+          "when": "editorLangId == 'markdown' || activeCustomEditorId == 'marklive.editor'"
         },
         {
-          "command": "liveMarkdown.toggle",
-          "when": "editorLangId == 'markdown' || activeCustomEditorId == 'liveMarkdown.editor'"
+          "command": "marklive.toggle",
+          "when": "editorLangId == 'markdown' || activeCustomEditorId == 'marklive.editor'"
         }
       ]
     },
     "configuration": {
-      "title": "Live Markdown Editor",
+      "title": "Marklive",
       "properties": {
-        "liveMarkdown.syntaxReveal": {
+        "marklive.syntaxReveal": {
           "type": "boolean",
           "default": true,
           "description": "Reveal Markdown syntax (**, #, [..](..), `) around the element under the cursor, Obsidian-style."
         },
-        "liveMarkdown.syncDelay": {
+        "marklive.syncDelay": {
           "type": "number",
           "default": 120,
           "minimum": 0,
           "maximum": 2000,
           "description": "Delay (ms) before edits made in the Live editor are written to the underlying text document."
         },
-        "liveMarkdown.mermaid.enabled": {
+        "marklive.mermaid.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Render ```mermaid code blocks as diagrams."
         },
-        "liveMarkdown.maxWidth": {
+        "marklive.maxWidth": {
           "type": "string",
           "default": "900px",
           "description": "Maximum width of the editing column (CSS length, e.g. 900px or 100%)."

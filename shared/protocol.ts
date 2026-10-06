@@ -5,7 +5,7 @@
  * document's EOL when applying edits.
  */
 
-export interface LiveMarkdownConfig {
+export interface MarkliveConfig {
   syntaxReveal: boolean;
   syncDelay: number;
   mermaidEnabled: boolean;
@@ -16,7 +16,7 @@ export interface InitMessage {
   type: 'init';
   text: string;
   version: number;
-  config: LiveMarkdownConfig;
+  config: MarkliveConfig;
   documentUri: string;
   /** Webview URI of the document folder (with trailing slash), used to resolve relative images. */
   baseUri: string;
@@ -46,7 +46,7 @@ export interface RejectMessage {
 
 export interface ConfigMessage {
   type: 'config';
-  config: LiveMarkdownConfig;
+  config: MarkliveConfig;
 }
 
 export interface FlushRequestMessage {
