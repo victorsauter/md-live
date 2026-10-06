@@ -137,4 +137,24 @@ suite('Webview editor (end to end)', () => {
     assert.strictEqual(doc.isDirty, false, 'revealing syntax never edits the document');
     assert.strictEqual(doc.getText(), SHOWCASE);
   });
+
+  test('Find highlights and navigates matches without editing the document', async () => {
+    const content = '# Find\n\nneedle and needle\n\n```text\nneedle\n```\n';
+    const { doc, run } = await openLive(content);
+    await vscode.commands.executeCommand('marklive.find', 'needle');
+    await waitUntil(async () => (await run({ kind: 'probe' })).find.open, 3000, 'find widget open');
+
+    const first = await run({ kind: 'probe' });
+    assert.strictEqual(first.find.query, 'needle');
+    assert.strictEqual(first.find.count, 3);
+    assert.strictEqual(first.find.index, 1);
+    assert.strictEqual(first.find.decorations, 3);
+
+    await run({ kind: 'moveFind', delta: 1 });
+    const next = await run({ kind: 'probe' });
+    assert.strictEqual(next.find.index, 2);
+    assert.strictEqual(doc.getText(), content);
+    assert.strictEqual(doc.isDirty, false);
+    assertNoErrors(next);
+  });
 });

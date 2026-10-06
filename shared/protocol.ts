@@ -56,12 +56,18 @@ export interface FlushRequestMessage {
 
 export interface CommandMessage {
   type: 'command';
-  command: 'undo' | 'redo' | 'find';
+  command: 'undo' | 'redo';
+}
+
+export interface FindMessage {
+  type: 'find';
+  query?: string;
 }
 
 /** Automation hooks used by the integration tests to drive the real webview editor. */
 export type TestAction =
   | { kind: 'probe' }
+  | { kind: 'moveFind'; delta: number }
   | { kind: 'replaceText'; needle: string; text: string; occurrence?: number }
   | { kind: 'toggleMark'; needle: string; mark: 'bold' | 'italic' | 'strike' | 'code'; occurrence?: number }
   | { kind: 'undo' }
@@ -76,6 +82,7 @@ export interface TestProbe {
   highlightedTokens: number;
   /** Markdown markers currently revealed around the selection (Phase 12). */
   syntax: string[];
+  find: { open: boolean; query: string; count: number; index: number; decorations: number; error: string | null };
   errors: string[];
 }
 
@@ -93,6 +100,7 @@ export type HostToWebviewMessage =
   | RejectMessage
   | ConfigMessage
   | FlushRequestMessage
+  | FindMessage
   | CommandMessage;
 
 export interface ReadyMessage {

@@ -4,6 +4,7 @@
  */
 import type { Editor } from '@tiptap/core';
 import type { TestAction, TestProbe } from '../../shared/protocol';
+import { findPluginKey, moveFindMatch } from './editor/find';
 
 declare global {
   interface Window {
@@ -33,6 +34,7 @@ function findText(editor: Editor, needle: string, occurrence = 0): { from: numbe
 
 export function probe(editor: Editor, status: string): TestProbe {
   const blocks = [...document.querySelectorAll('.lm-code.lm-is-mermaid')];
+  const find = findPluginKey.getState(editor.state);
   return {
     editable: editor.isEditable,
     status,
@@ -44,6 +46,14 @@ export function probe(editor: Editor, status: string): TestProbe {
     },
     highlightedTokens: document.querySelectorAll('.lm-code [class^="hljs-"]').length,
     syntax: [...editor.view.dom.querySelectorAll('.lm-syntax')].map((el) => el.textContent ?? ''),
+    find: {
+      open: document.querySelector('.lm-find-widget') !== null,
+      query: find?.query ?? '',
+      count: find?.matches.length ?? 0,
+      index: find?.matches.length ? find.activeIndex + 1 : 0,
+      decorations: editor.view.dom.querySelectorAll('.lm-find-match').length,
+      error: find?.error ?? null,
+    },
     errors: [...(window.__lmErrors ?? [])],
   };
 }
@@ -51,6 +61,9 @@ export function probe(editor: Editor, status: string): TestProbe {
 export function runTestAction(editor: Editor, action: TestAction, status: string): TestProbe {
   switch (action.kind) {
     case 'probe':
+      break;
+    case 'moveFind':
+      moveFindMatch(editor, action.delta);
       break;
     case 'replaceText': {
       const { from, to } = findText(editor, action.needle, action.occurrence);

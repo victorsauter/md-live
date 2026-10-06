@@ -31,6 +31,9 @@ export class ModeCommands {
       vscode.commands.registerCommand('marklive.openLive', (uri?: vscode.Uri) => this.openLive(uri, true)),
       vscode.commands.registerCommand('marklive.openSource', (uri?: vscode.Uri) => this.openSource(uri, true)),
       vscode.commands.registerCommand('marklive.openSplit', (uri?: vscode.Uri) => this.openSplit(uri)),
+      vscode.commands.registerCommand('marklive.find', (query?: string) =>
+        this.provider.postToActive({ type: 'find', ...(typeof query === 'string' ? { query } : {}) }),
+      ),
       vscode.commands.registerCommand('marklive.toggle', (uri?: vscode.Uri) => this.toggle(uri)),
       vscode.commands.registerCommand('marklive.disableDefault', (scope?: unknown) => this.setDefault(false, scope)),
       vscode.commands.registerCommand('marklive.enableDefault', (scope?: unknown) => this.setDefault(true, scope)),

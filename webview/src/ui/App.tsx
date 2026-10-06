@@ -1,9 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditorState } from '@tiptap/react';
 import type { Editor } from '@tiptap/core';
+import { TextSelection } from '@tiptap/pm/state';
 import type { SyncStatus } from '../../../shared/sync/SyncClient';
 import type { LiveEditorController } from '../controller';
 import { isTaskItem, toggleTask } from '../editor/behaviors';
+import { findPluginKey, hideFind, moveFindMatch, scrollToFindMatch, setFindQuery } from '../editor/find';
 import { LANGUAGE_SUGGESTIONS } from '../editor/highlight';
 import { insertBlockAfterText, insertTable, setColumnAlign, tableContext, type Align } from '../editor/table';
 import type { VsCodeApi } from '../vscode';
@@ -21,7 +23,34 @@ export function App({ controller, vscode }: AppProps) {
   const [loaded, setLoaded] = useState(controller.client.loaded);
   const [dialog, setDialog] = useState<Dialog>(null);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const [findOpen, setFindOpen] = useState(false);
   const editor = controller.editor;
+
+  const openFind = useCallback(
+    (query?: string) => {
+      const state = findPluginKey.getState(editor.state);
+      const { selection, doc } = editor.state;
+      const selectedText = selection.empty ? '' : doc.textBetween(selection.from, selection.to, ' ');
+      setFindQuery(editor, query ?? (selectedText || state?.query || ''));
+      setFindOpen(true);
+    },
+    [editor],
+  );
+
+  const closeFind = useCallback(() => {
+    const match = controller.currentFindMatch;
+    hideFind(editor);
+    setFindOpen(false);
+    if (match) {
+      const { state } = editor;
+      editor.view.dispatch(
+        state.tr
+          .setSelection(TextSelection.create(state.doc, match.from, match.to))
+          .setMeta('addToHistory', false),
+      );
+    }
+    editor.commands.focus();
+  }, [controller, editor]);
 
   useLayoutEffect(() => {
     host.current?.appendChild(controller.element);
@@ -33,9 +62,31 @@ export function App({ controller, vscode }: AppProps) {
         if (event.type === 'status') setStatus(event.status);
         else if (event.type === 'loaded') setLoaded(true);
         else if (event.type === 'requestLink') setDialog(linkDialogState(editor));
+        else if (event.type === 'find') openFind(event.query);
       }),
-    [controller, editor],
+    [controller, editor, openFind],
   );
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if ((event.ctrlKey || event.metaKey) && !event.altKey && key === 'f') {
+        event.preventDefault();
+        event.stopPropagation();
+        openFind();
+      } else if (findOpen && key === 'f3') {
+        event.preventDefault();
+        event.stopPropagation();
+        moveFindMatch(editor, event.shiftKey ? -1 : 1);
+      } else if (findOpen && key === 'escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeFind();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [closeFind, editor, findOpen, openFind]);
 
   // Keys handled by the editor must not reach VS Code (Ctrl+B, Ctrl+K, Ctrl+Z...), except save.
   useEffect(() => {
@@ -92,6 +143,7 @@ export function App({ controller, vscode }: AppProps) {
         {!loaded && <div className="lm-loading">Loading…</div>}
         <div ref={host} className="lm-document" />
       </main>
+      {findOpen && <FindWidget editor={editor} onClose={closeFind} />}
       <StatusBar status={status} />
       {dialog?.kind === 'link' && <LinkDialog editor={editor} state={dialog} onClose={() => setDialog(null)} />}
       {dialog?.kind === 'image' && <ImageDialog editor={editor} onClose={() => setDialog(null)} />}
@@ -101,6 +153,95 @@ export function App({ controller, vscode }: AppProps) {
           <option key={language} value={language} />
         ))}
       </datalist>
+    </div>
+  );
+}
+
+function FindWidget({ editor, onClose }: { editor: Editor; onClose: () => void }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  const state = useEditorState({
+    editor,
+    selector: ({ editor: current }) => (current ? findPluginKey.getState(current.state) : undefined),
+  });
+
+  useEffect(() => {
+    input.current?.focus();
+    input.current?.select();
+  }, []);
+
+  useEffect(() => {
+    const match = state?.matches[state.activeIndex];
+    if (match) scrollToFindMatch(editor, match);
+  }, [editor, state]);
+
+  if (!state) return null;
+  const updateOptions = (update: Partial<typeof state>) =>
+    setFindQuery(editor, state.query, {
+      caseSensitive: update.caseSensitive ?? state.caseSensitive,
+      wholeWord: update.wholeWord ?? state.wholeWord,
+      regex: update.regex ?? state.regex,
+    });
+  const count = state.matches.length
+    ? `${state.activeIndex + 1} of ${state.matches.length}`
+    : state.query
+      ? 'No results'
+      : '';
+  const navigate = (delta: number) => moveFindMatch(editor, delta);
+
+  return (
+    <div className="lm-find-widget" role="search" aria-label="Find in document">
+      <div className="lm-find-row">
+        <input
+          ref={input}
+          className={state.error ? 'lm-find-input lm-find-input-error' : 'lm-find-input'}
+          type="text"
+          aria-label="Find"
+          aria-invalid={state.error !== null}
+          value={state.query}
+          onChange={(event) => setFindQuery(editor, event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              event.stopPropagation();
+              navigate(event.shiftKey ? -1 : 1);
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              event.stopPropagation();
+              onClose();
+            }
+          }}
+        />
+        <span className="lm-find-count" aria-live="polite" title={state.error ?? undefined}>
+          {count}
+        </span>
+        <button type="button" className="lm-find-btn" title="Previous match (Shift+Enter)" aria-label="Previous match" disabled={!state.matches.length} onClick={() => navigate(-1)}>
+          ‹
+        </button>
+        <button type="button" className="lm-find-btn" title="Next match (Enter)" aria-label="Next match" disabled={!state.matches.length} onClick={() => navigate(1)}>
+          ›
+        </button>
+        <button type="button" className={`lm-find-btn${showOptions ? ' lm-find-btn-active' : ''}`} title="Find options" aria-label="Find options" aria-expanded={showOptions} onClick={() => setShowOptions((open) => !open)}>
+          ⋯
+        </button>
+        <button type="button" className="lm-find-btn" title="Close (Escape)" aria-label="Close find" onClick={onClose}>
+          ×
+        </button>
+      </div>
+      {showOptions && (
+        <div className="lm-find-options">
+          <button type="button" className={state.caseSensitive ? 'lm-find-option lm-find-option-active' : 'lm-find-option'} aria-pressed={state.caseSensitive} onClick={() => updateOptions({ caseSensitive: !state.caseSensitive })}>
+            Aa <span>Match Case</span>
+          </button>
+          <button type="button" className={state.wholeWord ? 'lm-find-option lm-find-option-active' : 'lm-find-option'} aria-pressed={state.wholeWord} onClick={() => updateOptions({ wholeWord: !state.wholeWord })}>
+            ab <span>Match Whole Word</span>
+          </button>
+          <button type="button" className={state.regex ? 'lm-find-option lm-find-option-active' : 'lm-find-option'} aria-pressed={state.regex} onClick={() => updateOptions({ regex: !state.regex })}>
+            .* <span>Use Regular Expression</span>
+          </button>
+        </div>
+      )}
+      {state.error && <div className="lm-find-error" role="alert">{state.error}</div>}
     </div>
   );
 }

@@ -50,6 +50,7 @@ body {
 }
 
 .lm-app {
+  position: relative;
   display: flex;
   flex-direction: column;
 }
@@ -149,6 +150,110 @@ body {
   text-align: center;
 }
 
+.lm-find-widget {
+  position: absolute;
+  z-index: 15;
+  top: 8px;
+  right: 16px;
+  min-width: min(420px, calc(100vw - 32px));
+  color: var(--vscode-editorWidget-foreground, var(--lm-fg));
+  background: var(--vscode-editorWidget-background, var(--lm-bg));
+  border: 1px solid var(--vscode-editorWidget-border, var(--lm-border));
+  border-radius: 5px;
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
+  font-size: 12px;
+}
+
+.lm-find-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+}
+
+.lm-find-input {
+  min-width: 80px;
+  flex: 1;
+  height: 26px;
+  padding: 3px 6px;
+  color: var(--vscode-input-foreground, var(--lm-fg));
+  background: var(--vscode-input-background, var(--lm-bg));
+  border: 1px solid var(--vscode-input-border, var(--lm-border));
+  border-radius: 3px;
+  font: inherit;
+}
+
+.lm-find-input:focus {
+  outline: 1px solid var(--lm-focus);
+  outline-offset: -1px;
+}
+
+.lm-find-input-error {
+  border-color: var(--vscode-inputValidation-errorBorder, var(--vscode-errorForeground));
+}
+
+.lm-find-count {
+  min-width: 58px;
+  color: var(--vscode-descriptionForeground, var(--lm-muted));
+  text-align: center;
+  white-space: nowrap;
+}
+
+.lm-find-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.lm-find-btn:hover:not(:disabled),
+.lm-find-btn-active {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.lm-find-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lm-find-options {
+  display: flex;
+  gap: 2px;
+  padding: 0 4px 4px;
+}
+
+.lm-find-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 5px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lm-find-option:hover,
+.lm-find-option-active {
+  background: var(--vscode-inputOption-activeBackground, rgba(128, 128, 128, 0.2));
+  border-color: var(--vscode-inputOption-activeBorder, transparent);
+  color: var(--vscode-inputOption-activeForeground, var(--lm-fg));
+}
+
+.lm-find-error {
+  padding: 0 8px 6px;
+  color: var(--vscode-inputValidation-errorForeground, var(--vscode-errorForeground));
+  font-size: 11px;
+}
+
 .lm-document {
   max-width: var(--lm-max-width);
   margin: 0 auto;
@@ -201,6 +306,18 @@ body {
 
 .ProseMirror ::selection {
   background: var(--lm-selection);
+}
+
+.lm-find-match {
+  background: var(--vscode-editor-findMatchHighlightBackground, rgba(234, 92, 0, 0.33));
+  border-bottom: 1px solid var(--vscode-editor-findMatchHighlightBorder, transparent);
+}
+
+.lm-find-match-current {
+  background: var(--vscode-editor-findMatchBackground, rgba(255, 200, 0, 0.5));
+  outline: 1px solid var(--vscode-editor-findMatchBorder, transparent);
+  outline-offset: -1px;
+  border-bottom-color: var(--vscode-editor-findMatchHighlightBorder, transparent);
 }
 
 .ProseMirror-selectednode {

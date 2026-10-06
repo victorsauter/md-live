@@ -12,11 +12,13 @@ export interface TestProbe {
   highlightedTokens: number;
   /** Markdown markers currently revealed around the selection (Phase 12). */
   syntax: string[];
+  find: { open: boolean; query: string; count: number; index: number; decorations: number; error: string | null };
   errors: string[];
 }
 
 export type TestAction =
   | { kind: 'probe' }
+  | { kind: 'moveFind'; delta: number }
   | { kind: 'replaceText'; needle: string; text: string; occurrence?: number }
   | { kind: 'toggleMark'; needle: string; mark: 'bold' | 'italic' | 'strike' | 'code'; occurrence?: number }
   | { kind: 'undo' }

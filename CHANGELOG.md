@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+* **Fixed**: Find (`Ctrl+F` / `Cmd+F`) in Live mode now uses an in-editor search widget with
+  highlighted matches instead of the native webview find widget.
+
 ## 0.1.0
 
 First release of **Marklive — Live Markdown Editor**.

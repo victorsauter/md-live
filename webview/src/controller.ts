@@ -9,6 +9,7 @@ import type { HostToWebviewMessage, MarkliveConfig } from '../../shared/protocol
 import { headingAnchors } from '../../shared/slug';
 import { SyncClient, type SyncStatus } from '../../shared/sync/SyncClient';
 import { createEditor } from './editor/createEditor';
+import { findPluginKey, type FindMatch, type FindState } from './editor/find';
 import { isDarkTheme, resetMermaidTheme } from './editor/mermaid';
 import { rerenderMermaidDiagrams, wikilinkTarget } from './editor/nodeviews';
 import type { EditorServices } from './editor/services';
@@ -27,7 +28,8 @@ export type ControllerEvent =
   | { type: 'status'; status: SyncStatus }
   | { type: 'loaded' }
   | { type: 'config' }
-  | { type: 'requestLink' };
+  | { type: 'requestLink' }
+  | { type: 'find'; query?: string };
 
 type Listener = (event: ControllerEvent) => void;
 
@@ -108,6 +110,9 @@ export class LiveEditorController {
       case 'config':
         this.applyConfig(message.config);
         break;
+      case 'find':
+        this.emit({ type: 'find', query: message.query });
+        break;
       case 'flush':
         this.client.send();
         this.vscode.postMessage({ type: 'flushed', requestId: message.requestId });
@@ -129,6 +134,15 @@ export class LiveEditorController {
         this.client.handleMessage(message);
         break;
     }
+  }
+
+  get findState(): FindState | undefined {
+    return findPluginKey.getState(this.editor.state);
+  }
+
+  get currentFindMatch(): FindMatch | undefined {
+    const state = this.findState;
+    return state?.matches[state.activeIndex];
   }
 
   private applyConfig(config: MarkliveConfig): void {

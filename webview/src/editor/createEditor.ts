@@ -6,6 +6,7 @@ import { Editor, Extension, type AnyExtension, type NodeViewRenderer } from '@ti
 import { Dropcursor, Gapcursor, Placeholder, UndoRedo } from '@tiptap/extensions';
 import { createMarkdownExtensions } from '../../../shared/markdown/schema';
 import { createBehaviors, MarkdownClipboard } from './behaviors';
+import { findPlugin } from './find';
 import { highlightPlugin } from './highlight';
 import { codeBlockView, imageView, listItemView, rawBlockView, rawInlineView } from './nodeviews';
 import type { EditorServices } from './services';
@@ -16,6 +17,13 @@ const Highlight = Extension.create({
   name: 'markliveHighlight',
   addProseMirrorPlugins() {
     return [highlightPlugin()];
+  },
+});
+
+const Find = Extension.create({
+  name: 'markliveFind',
+  addProseMirrorPlugins() {
+    return [findPlugin()];
   },
 });
 
@@ -48,6 +56,7 @@ export function createEditor({ element, services, onTransaction }: CreateEditorO
     Gapcursor,
     Placeholder.configure({ placeholder: 'Start writing…', showOnlyCurrent: false }),
     Highlight,
+    Find,
     Extension.create({
       name: 'markliveSyntax',
       addProseMirrorPlugins: () => [syntaxRevealPlugin(services)],

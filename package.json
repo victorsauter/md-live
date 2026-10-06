@@ -2,7 +2,7 @@
   "name": "marklive",
   "displayName": "Marklive — Live Markdown Editor",
   "description": "Edit Markdown files directly in their rendered form (Obsidian-style Live Preview) while keeping Markdown as the source of truth and Git diffs clean.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "victorsauter",
   "repository": {
     "type": "git",
@@ -67,6 +67,11 @@
         "icon": "$(split-horizontal)"
       },
       {
+        "command": "marklive.find",
+        "title": "Find",
+        "category": "Marklive"
+      },
+      {
         "command": "marklive.toggle",
         "title": "Toggle Live / Source",
         "category": "Marklive"
@@ -88,6 +93,12 @@
         "key": "ctrl+shift+m",
         "mac": "cmd+shift+m",
         "when": "activeCustomEditorId == 'marklive.editor' || (editorTextFocus && editorLangId == 'markdown' && !isInDiffEditor)"
+      },
+      {
+        "command": "marklive.find",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "activeCustomEditorId == 'marklive.editor'"
       }
     ],
     "menus": {
@@ -120,6 +131,10 @@
         {
           "command": "marklive.openSplit",
           "when": "editorLangId == 'markdown' || activeCustomEditorId == 'marklive.editor'"
+        },
+        {
+          "command": "marklive.find",
+          "when": "activeCustomEditorId == 'marklive.editor'"
         },
         {
           "command": "marklive.toggle",

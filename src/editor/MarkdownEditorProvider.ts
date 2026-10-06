@@ -69,7 +69,7 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     const provider = new MarkdownEditorProvider(context);
     context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {
-        webviewOptions: { retainContextWhenHidden: true, enableFindWidget: true },
+        webviewOptions: { retainContextWhenHidden: true, enableFindWidget: false },
         supportsMultipleEditorsPerDocument: true,
       }),
     );
@@ -95,6 +95,11 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     for (const entry of this.entries) {
       if (entry.document === document) void entry.panel.webview.postMessage(message);
     }
+  }
+
+  postToActive(message: HostToWebviewMessage): void {
+    const entry = this.activeEntry;
+    if (entry?.panel.active) void entry.panel.webview.postMessage(message);
   }
 
   // ---- Hooks used by the integration tests -------------------------------------------------

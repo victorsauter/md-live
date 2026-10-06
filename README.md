@@ -28,7 +28,8 @@ edit.
   and written back verbatim.
 * **VS Code integration**: dark, light and high-contrast themes (VS Code CSS variables), dirty
   state, save, auto save, hot exit, undo/redo, external changes (git checkout, other editors,
-  formatters) and native diff views keep working.
+  formatters) and native diff views keep working. Live mode includes an in-editor Find widget with
+  match highlighting, case-sensitive, whole-word and regular-expression options.
 
 ## Usage
 
@@ -39,6 +40,7 @@ Markdown files (`*.md`, `*.markdown`) open in the Live editor by default.
 | `Marklive: Open in Live Editor` | | Reopen the file in the Live editor |
 | `Marklive: Open in Source Editor` | | Reopen the file in VS Code's text editor |
 | `Marklive: Open Source and Live Side by Side` | | Split mode |
+| `Marklive: Find` | `Ctrl+F` / `Cmd+F` | Search and highlight matches in Live mode |
 | `Marklive: Toggle Live / Source` | `Ctrl+Shift+M` / `Cmd+Shift+M` | Switch between Live and Source |
 | `Marklive: Disable Marklive as Default Editor` | | Open Markdown files in the text editor by default (`workbench.editorAssociations`) |
 | `Marklive: Enable Marklive as Default Editor` | | Restore the Live editor as default |
@@ -58,6 +60,7 @@ without a "Save changes?" prompt. The Live editor toolbar also has *Live / Sourc
 | `Ctrl/Cmd+Shift+B`, `Ctrl/Cmd+Alt+C` | Blockquote, code block |
 | `Tab` / `Shift+Tab` | Indent / outdent list item, next / previous table cell, indent code |
 | `Ctrl/Cmd+Z`, `Ctrl/Cmd+Y` / `Ctrl/Cmd+Shift+Z` | Undo, redo |
+| `Ctrl/Cmd+F` | Open Find; `Enter` / `Shift+Enter` and `F3` / `Shift+F3` navigate matches; `Escape` selects the current match and closes Find |
 | `Ctrl/Cmd+S` | Save (pending edits are flushed first) |
 
 Markdown input rules work as you type: `# `, `- `, `1. `, `> `, ```` ``` ````, `**bold**`,
@@ -135,7 +138,8 @@ These behaviours were verified with integration tests (`test/integration/suite/s
 
 * **Unit tests** (Vitest, `test/unit`): byte-identical golden round-trips of every fixture in LF and
   CRLF, targeted edits (one word → one line), forced regeneration checked for semantic equivalence,
-  a Markdown fuzzer, the clipboard, the sync client, the text diff, syntax reveal and a real
+  a Markdown fuzzer, the clipboard, the sync client, in-editor Find matching (including marks,
+  Unicode, tables and code blocks), the text diff, syntax reveal and a real
   `git diff --numstat` in a temporary repository.
 * **Integration tests** (`@vscode/test-cli`, `test/integration`): the custom editor in a real VS Code
   — opening never modifies a file, edits made in the webview (typing, bold, table cell, code) reach
@@ -184,7 +188,7 @@ fake host (useful to debug the editor with browser dev tools).
 `media/icon.png` is rendered from `media/logo.svg` by `scripts/generate-icon.ps1` (Windows, headless
 Microsoft Edge).
 
-Install the packaged extension with `code --install-extension marklive-0.1.0.vsix`.
+Install the packaged extension with `code --install-extension marklive-0.1.1.vsix`.
 
 ### Integration tests
 
