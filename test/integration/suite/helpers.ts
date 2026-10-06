@@ -31,7 +31,7 @@ export interface ProviderHooks {
 }
 
 export async function getApi(): Promise<{ provider: ProviderHooks; globalStorageUri: vscode.Uri }> {
-  const ext = vscode.extensions.getExtension('savt.marklive');
+  const ext = vscode.extensions.getExtension('victorsauter.marklive');
   if (!ext) throw new Error('extension not found');
   return (await ext.activate()) as { provider: ProviderHooks; globalStorageUri: vscode.Uri };
 }

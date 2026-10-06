@@ -3,7 +3,16 @@
   "displayName": "Marklive — Live Markdown Editor",
   "description": "Edit Markdown files directly in their rendered form (Obsidian-style Live Preview) while keeping Markdown as the source of truth and Git diffs clean.",
   "version": "0.1.0",
-  "publisher": "savt",
+  "publisher": "victorsauter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/victorsauter/marklive.git"
+  },
+  "bugs": {
+    "url": "https://github.com/victorsauter/marklive/issues"
+  },
+  "homepage": "https://github.com/victorsauter/marklive#readme",
+  "preview": true,
   "license": "MIT",
   "private": true,
   "icon": "media/icon.png",
@@ -158,7 +167,7 @@
     "test:integration": "vscode-test",
     "validate:repos": "esbuild scripts/validate-repos.ts --bundle --platform=node --format=esm --outfile=out/validate-repos.mjs --log-level=warning && node out/validate-repos.mjs",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "package": "npm run check && vsce package --no-dependencies --allow-missing-repository",
+    "package": "npm run check && vsce package --no-dependencies",
     "vscode:prepublish": "npm run build:prod"
   },
   "devDependencies": {
